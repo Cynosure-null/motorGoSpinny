@@ -61,6 +61,7 @@ class Robot : public frc::TimedRobot {
   void DisabledPeriodic() override;
   void TestInit() override;
   void TestPeriodic() override;
+  void InitializePIDControllers();
 
  private:
   frc::SendableChooser<std::string> m_chooser;
@@ -83,4 +84,14 @@ rev::SparkMaxPIDController m_motorAPIDEncoder = m_motorA.GetPIDController();
 rev::SparkMaxPIDController m_motorBPIDEncoder = m_motorB.GetPIDController();
 
 
+struct pidCoeff {
+    double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput;
 };
+
+
+pidCoeff m_motorACoeff{4.0e-4, 1e-7, 0.0, 0.0, 0.0002, 1.0, -1.0};
+pidCoeff m_motorBCoeff{4.0e-4, 1e-7, 0.0, 0.0, 0.0002, 1.0, -1.0};
+
+bool m_running;
+};
+

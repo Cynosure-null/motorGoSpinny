@@ -8,10 +8,14 @@
 
 #include <frc/smartdashboard/SmartDashboard.h>
 
+#include <iostream>
+
 void Robot::RobotInit() {
   m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
   m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
+  InitializePIDControllers(); 
+ // m_motorB.Follow(m_motorA, true);
 }
 
 /**
@@ -23,8 +27,11 @@ void Robot::RobotInit() {
  * LiveWindow and SmartDashboard integrated updating.
  */
 void Robot::RobotPeriodic() {
-  m_stick.SetRumble(frc::GenericHID::RumbleType::kLeftRumble, 1.0); 
-  m_stick.SetRumble(frc::GenericHID::RumbleType::kRightRumble, 1.0);
+  // m_stick.SetRumble(frc::GenericHID::RumbleType::kLeftRumble, 1.0); 
+  // m_stick.SetRumble(frc::GenericHID::RumbleType::kRightRumble, 1.0);
+m_motorAEncoder.SetPosition(0.0);
+m_motorBEncoder.SetPosition(0.0);
+
 }
 /**
  * This autonomous (along with the chooser code above) shows how to select
@@ -59,14 +66,34 @@ void Robot::AutonomousPeriodic() {
 }
 
 void Robot::TeleopInit() {
-  if (m_stick.GetYButtonPressed()){
-  m_motorAPIDEncoder.SetReference(20000, rev::ControlType::kVelocity);
-  m_motorBPIDEncoder.SetReference(20000, rev::ControlType::kVelocity);
-  }
-
+  InitializePIDControllers(); 
 }
 
-void Robot::TeleopPeriodic() {}
+void Robot::TeleopPeriodic() {
+  std::cout << "Velocity 1: " << m_motorAEncoder.GetVelocity() << "\n";
+  std::cout << "Velocity 2: " << m_motorBEncoder.GetVelocity() << "\n";
+  /*
+  if (m_stick.GetYButton()){
+  m_motorAPIDEncoder.SetReference(2500.0, rev::ControlType::kVelocity);
+  m_motorBPIDEncoder.SetReference(-2500.0, rev::ControlType::kVelocity);
+  }
+  else {
+  m_motorAPIDEncoder.SetReference(0.0, rev::ControlType::kVelocity);
+  m_motorBPIDEncoder.SetReference(0.0, rev::ControlType::kVelocity);
+  }
+*/
+if (m_stick.GetLeftBumper()){
+  std::cout << "pressed \n";
+  m_motorA.Set(-0.5);
+ m_motorB.Set(0.5);
+  }
+else {
+    std::cout << "not pressed \n";
+  m_motorA.Set(0.0);
+m_motorB.Set(0.0);
+  }
+}
+
 
 void Robot::DisabledInit() {}
 
@@ -75,6 +102,22 @@ void Robot::DisabledPeriodic() {}
 void Robot::TestInit() {}
 
 void Robot::TestPeriodic() {}
+
+void Robot::InitializePIDControllers() {
+  m_motorAPIDEncoder.SetP(m_motorACoeff.kP);
+  m_motorAPIDEncoder.SetI(m_motorACoeff.kI);
+  m_motorAPIDEncoder.SetD(m_motorACoeff.kD);
+  m_motorAPIDEncoder.SetIZone(m_motorACoeff.kIz);
+  m_motorAPIDEncoder.SetFF(m_motorACoeff.kFF);
+  m_motorAPIDEncoder.SetOutputRange(m_motorACoeff.kMinOutput, m_motorACoeff.kMaxOutput);
+
+  m_motorBPIDEncoder.SetP(m_motorBCoeff.kP);
+  m_motorBPIDEncoder.SetI(m_motorBCoeff.kI);
+  m_motorBPIDEncoder.SetD(m_motorBCoeff.kD);
+  m_motorBPIDEncoder.SetIZone(m_motorBCoeff.kIz);
+  m_motorBPIDEncoder.SetFF(m_motorBCoeff.kFF);
+  m_motorBPIDEncoder.SetOutputRange(m_motorBCoeff.kMinOutput, m_motorBCoeff.kMaxOutput);
+}
 
 #ifndef RUNNING_FRC_TESTS
 int main() {
